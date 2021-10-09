@@ -1,0 +1,149 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=Модули, initial-scale=1.0" />
+    <link rel="stylesheet" href="/node_modules/mini.css/dist/mini-default.css" />
+    <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="/node_modules/flatpickr/dist/themes/material_blue.css" />
+    <link rel="stylesheet" href="/node_modules/tingle.js/dist/tingle.min.css" />
+    <link rel="stylesheet" href="/node_modules/toastify-js/src/toastify.css" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Модули</title>
+  </head>
+  <body>
+    <div class="date-info">
+      <p class="chosen-date-text">Дата и время не выбраны</p>
+      <i class="edit-info fa fa-pencil-square-o" aria-hidden="true"></i>
+    </div>
+  </body>
+</html>
+<script src="/node_modules/tingle.js/dist/tingle.min.js"></script>
+<script src="/node_modules/flatpickr/dist/flatpickr.js"></script>
+<script src="/node_modules/toastify-js/src/toastify.js"></script>
+<script>
+  let date = '';
+  let time = '';
+
+  let datePicker;
+  let timePicker;
+
+  /*Modal window's settings*/
+  const modal = new tingle.modal({
+    footer: true,
+    stickyFooter: false,
+    closeMethods: [],
+    onOpen: function () {
+      const today = new Date();
+      const nowTime = today.getHours() + ':' + today.getMinutes();
+
+      timePicker = new flatpickr('.time', {
+        allowInput: true,
+        enableTime: true,
+        mode: 'single',
+        noCalendar: true,
+        dateFormat: 'H:i',
+        time_24hr: true,
+        minTime: nowTime,
+        defaultDate: time,
+      });
+
+      datePicker = new flatpickr('.date', {
+        allowInput: true,
+        mode: 'single',
+        enableTime: false,
+        minDate: 'today',
+        defaultDate: date,
+      });
+    },
+  });
+
+  modal.setContent(`<h1 class="event-title">Введите информацию о событии</h1>
+                    <div class="event-info"><span class="event-text">Дата: </span><input class="event-input date"/></div>
+                    <div class="event-info"><span class="event-text">Время: </span><input class="event-input time"/></div>`);
+
+  modal.addFooterBtn('Отмена', 'tingle-btn tingle-btn--pull-right tingle-btn--close', function () {
+    datePicker.destroy();
+    timePicker.destroy();
+
+    modal.close();
+  });
+
+  modal.addFooterBtn('Ок', 'tingle-btn tingle-btn--pull-right tingle-btn--primary', function () {
+    const curDate = dateInput.value;
+    const curTime = timeInput.value;
+
+    if (curDate === '') {
+      showNewToast('Введите дату!');
+
+      shakeDateInput();
+    }
+
+    if (curTime === '') {
+      showNewToast('Введите время!');
+
+      shakeTimeInput();
+    }
+
+    if (curDate !== '' && curTime !== '') {
+      date = curDate;
+      time = curTime;
+
+      setEventInfo();
+
+      datePicker.destroy();
+      timePicker.destroy();
+
+      modal.close();
+    }
+  });
+
+  const dateInput = document.querySelector('.date');
+  const timeInput = document.querySelector('.time');
+
+  const editIcon = document.querySelector('.edit-info');
+
+  editIcon.addEventListener('click', event => {
+    modal.open();
+  });
+
+  function setEventInfo() {
+    const chosenDateText = document.querySelector('.chosen-date-text');
+
+    chosenDateText.textContent = `${datePicker.selectedDateElem.ariaLabel}, ${time}`;
+  }
+
+  /*Shakes settings*/
+  function shakeDateInput() {
+    dateInput.classList.add('apply-shake');
+
+    dateInput.addEventListener('animationend', e => {
+      dateInput.classList.remove('apply-shake');
+    });
+  }
+
+  function shakeTimeInput() {
+    timeInput.classList.add('apply-shake');
+
+    timeInput.addEventListener('animationend', e => {
+      timeInput.classList.remove('apply-shake');
+    });
+  }
+
+  /*Toast's settings*/
+  function showNewToast(messageText) {
+    Toastify({
+      text: messageText,
+      duration: 5000,
+      newWindow: true,
+      close: true,
+      gravity: 'bottom',
+      position: 'right',
+      stopOnFocus: true,
+      style: {
+        background: '#3498db',
+      },
+      onClick: function () {},
+    }).showToast();
+  }
+</script>
